@@ -7,10 +7,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///data.db"
 db = SQLAlchemy(app)
 
 
-class Drink(db.Model):
+class Menu(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     description = db.Column(db.String(140))
+    product_type = db.Column(db.String(10), nullable=False)
 
     def __repr__(self):
         return f"{self.name} - {self.description}"
@@ -24,49 +25,89 @@ def index():
     return "Welcome to Cafe la Colombia!"
 
 
-@app.route('/drinks')
-def get_drinks():
-    drinks = Drink.query.all()
+@app.route('/menu')
+def get_menu():
+    menu = Menu.query.all()
 
-    if drinks is None:
-        return {"message": "No drinks yet."}
+    if not menu:
+        return {"message": "Menu is empty."}
+
+    output = []
+    for product in menu:
+        output.append({
+            'ID': product.id,
+            'name': product.name,
+            'description': product.description,
+            'type': product.product_type
+        })
+
+    return {"Menu": output}
+
+
+@app.route('/menu/drinks')
+def get_drinks():
+    drinks = Menu.query.all()
+
+    if not drinks:
+        return {"message": "Menu is empty."}
 
     output = []
     for drink in drinks:
-        output.append({
-            'ID': drink.id,
-            'name': drink.name,
-            'description': drink.description
-        })
+        if drink.product_type == "drinks":
+            output.append({
+                'ID': drink.id,
+                'name': drink.name,
+                'description': drink.description
+            })
 
     return {"drinks": output}
 
 
-@app.route('/drinks/<id>')
-def get_drink_by_id(id):
-    drink = Drink.query.get_or_404(id)
-    return {"name": drink.name, "description": drink.description}
+@app.route('/menu/food')
+def get_food():
+    product = Menu.query.all()
+
+    if not product:
+        return {"message": "Menu is empty."}
+
+    output = []
+    for food in product:
+        if food.product_type == "food":
+            output.append({
+                'ID': food.id,
+                'name': food.name,
+                'description': food.description
+            })
+
+    return {"food": output}
 
 
-@app.route('/drinks', methods=['POST'])
-def add_drinks():
-    drink = Drink(
+@app.route('/menu/<id>')
+def get_menu_by_id(id):
+    menu = Menu.query.get_or_404(id)
+    return {"name": menu.name, "description": menu.description}
+
+
+@app.route('/menu', methods=['POST'])
+def add_menu():
+    menu = Menu(
         name=request.json['name'],
-        description=request.json['description']
+        description=request.json['description'],
+        product_type=request.json['product_type']
     )
-    db.session.add(drink)
+    db.session.add(menu)
     db.session.commit()
-    return {"message": f"Drink {drink.id} added"}
+    return {"message": f"Menu {menu.id} added"}
 
 
-@app.route('/drinks/<id>', methods=['DELETE'])
-def delete_drinks(id):
-    drink = Drink.query.get(id)
+@app.route('/menu/<id>', methods=['DELETE'])
+def delete_menu(id):
+    menu = Menu.query.get(id)
 
-    if drink is None:
-        return {"error": f" Drink {id} not found"}
+    if menu is None:
+        return {"error": f"Menu {id} not found"}
 
-    db.session.delete(drink)
+    db.session.delete(menu)
     db.session.commit()
 
-    return {"message": "yeet coffee!"}
+    return {"message": "yeet!"}
