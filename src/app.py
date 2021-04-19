@@ -48,9 +48,6 @@ def get_menu():
 def get_drinks():
     drinks = Menu.query.all()
 
-    if not drinks:
-        return {"message": "Menu is empty."}
-
     output = []
     for drink in drinks:
         if drink.product_type == "drinks":
@@ -60,15 +57,15 @@ def get_drinks():
                 'description': drink.description
             })
 
-    return {"drinks": output}
+    if not output:
+        return {"message": "Menu is empty."}
+    else:
+        return {"drinks": output}
 
 
 @app.route('/menu/food')
 def get_food():
     product = Menu.query.all()
-
-    if not product:
-        return {"message": "Menu is empty."}
 
     output = []
     for food in product:
@@ -79,7 +76,10 @@ def get_food():
                 'description': food.description
             })
 
-    return {"food": output}
+    if not output:
+        return {"message": "Menu is empty."}
+    else:
+        return {"food": output}
 
 
 @app.route('/menu/<id>')
