@@ -21,7 +21,7 @@ db.create_all()
 
 @app.route('/')
 def index():
-    return "Hello, world!"
+    return "Welcome to Cafe la Colombia!"
 
 
 @app.route('/drinks')
