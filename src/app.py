@@ -28,7 +28,7 @@ def index():
 def get_drinks():
     drinks = Drink.query.all()
 
-    if not drinks:
+    if drinks is None:
         return {"message": "No drinks yet."}
 
     output = []
@@ -57,3 +57,16 @@ def add_drinks():
     db.session.add(drink)
     db.session.commit()
     return {"message": f"Drink {drink.id} added"}
+
+
+@app.route('/drinks/<id>', methods=['DELETE'])
+def delete_drinks(id):
+    drink = Drink.query.get(id)
+
+    if drink is None:
+        return {"error": f" Drink {id} not found"}
+
+    db.session.delete(drink)
+    db.session.commit()
+
+    return {"message": "yeet coffee!"}
